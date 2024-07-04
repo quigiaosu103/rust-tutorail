@@ -6,15 +6,16 @@ use axum::response::{Html, IntoResponse};
 use axum::{middleware, Json, Router};
 use axum::routing::{get, get_service, Route};
 use axum::handler;
+use model::ModelController;
 use serde::Deserialize;
 use tower_cookies::{Cookie, CookieManager, CookieManagerLayer, Cookies};
 use tower_http::services::ServeDir;
-
 use std::fmt::{format, Debug};
 pub use self::errors::{Error, Result};  
 mod errors;
 mod web;
 mod model;
+mod ctx;
 struct  SumationError;
 #[derive(Debug, Deserialize)]
 struct Params{
@@ -29,9 +30,13 @@ impl  Debug for SumationError {
 
 #[tokio::main]
 async fn main() {
+    let mc = ModelController::new().await.unwrap();
     let app = Router::new().merge(router_hello());
+    let api_app = web::router_tickets::routes(mc.clone())
+    .route_layer(middleware::from_fn(web::mw_authen::middleware_authen));
     let all_app = app
     .merge(web::router_login::routes())
+    .nest("/api", api_app)
     .layer(middleware::map_response(main_respone_mapper))
     .layer(CookieManagerLayer::new())
     .fallback_service(router_static());
@@ -50,7 +55,6 @@ fn router_static() -> Router {
 
 async fn main_respone_mapper(res: Response) -> Response {
     println!("--> {:<12} - main_response_mapper", "RES_MAPPER");
-
     res
 }
 

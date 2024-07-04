@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-axum = "0.6"
+axum = { version = "0.6", features = ["macros"]}
 httpc-test = "0.1.1"
 serde = { version = "1", features = ["derive"] }
 serde_derive = "1"
@@ -16,3 +16,5 @@ anyhow = "1"
 tower-http = {version="0.4", features = ["fs"]}
 
 tower-cookies = "0.9"
+
+lazy-regex = "2"

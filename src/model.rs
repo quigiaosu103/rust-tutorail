@@ -1,19 +1,21 @@
 use crate::{Error, Result};
 use axum::routing::delete;
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Mutex};
+use std::{clone, sync::{Arc, Mutex}};
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Ticket {
     id: u32,
     title: String
 }
 
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct  TicketForCreate {
     title: String
-
 }
 
+#[derive(Clone)]
 pub struct ModelController {
     store: Arc<Mutex<Vec<Option<Ticket>>>>
 }
@@ -23,7 +25,7 @@ pub struct ModelController {
 impl ModelController {
     pub async fn new() -> Result<Self> {
         Ok(Self{
-            store: Arc::new(Mutex::new(Vec::new()))
+            store: Arc::default()
         })
     }
 }
@@ -59,5 +61,5 @@ impl ModelController {
         //     None
         // });
         ticket.ok_or(Error::DeleteFailIdNotFound {id})
-    }
+    }   
 }
